@@ -1,21 +1,28 @@
 <template>
   <div id="home">
+
     <nav-bar class="home-nav">
       <template v-slot:center>
         <div>购物街</div>
       </template>
     </nav-bar>
-    <div class="wrapper">
-      <div class="content">
-        <home-swiper :banners="banners"></home-swiper>
-        <recommend-view :recommends="recommends"></recommend-view>
-        <feature-view></feature-view>
-        <tab-control class="tab-control" :titles="['流行', '新款', '精选']" @tabClick="tabClick"></tab-control>
-        <goods-list :goods="showGoods"></goods-list>
-      </div>
-    </div>
+    
+    <scroll class="content" 
+            ref="scroll" 
+            :probe-type="3" 
+            @scroll='contentScroll' 
+            :pull-up-load="true" 
+            @pullingUp='loadMore'>
+      <home-swiper :banners="banners"></home-swiper>
+      <recommend-view :recommends="recommends"></recommend-view>
+      <feature-view></feature-view>
+      <tab-control class="tab-control" 
+                   :titles="['流行', '新款', '精选']" 
+                   @tabClick="tabClick"></tab-control>
+      <goods-list :goods="showGoods"></goods-list>
+    </scroll>
 
-    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    <back-top @click.native="backClick" v-show="isShowBackTop"></back-top>
   </div>
 </template>
 
@@ -25,12 +32,13 @@
   import FeatureView from './childComps/FeatureView.vue';
 
   import NavBar from 'components/common/navbar/NavBar.vue';
+  import Scroll from 'components/common/scroll/Scroll.vue';
   import TabControl from 'components/content/TabControl/TabControl.vue';
   import GoodsList from 'components/content/goods/GoodsList';
+  import BackTop from 'components/content/backTop/BackTop.vue'
 
   import {getHomeMultidata, getHomeGoods} from 'network/home.js';
-  
-  import BScroll from 'better-scroll'
+
 
   export default {
     name: "Home",
@@ -40,7 +48,9 @@
       FeatureView,
       NavBar,
       TabControl,
-      GoodsList
+      GoodsList,
+      Scroll,
+      BackTop
     },
     data() {
       return {
@@ -51,7 +61,8 @@
           'new': {page: 0, list: []},
           'sell': {page: 0, list: []}
         },
-        currentType: 'pop'
+        currentType: 'pop',
+        isShowBackTop: true
       }
     },
     created() {  //组件创建完后立刻发送网络请求
@@ -83,8 +94,17 @@
             break;
         }
       },
-
-
+      backClick() {
+        this.$refs.scroll.scrollTo(0, 0, 500)
+      },
+      contentScroll(position) {
+        // console.log(position)
+        this.isShowBackTop = (-position.y) > 1000
+      },
+      loadMore() {
+        this.getHomeGoods(this.currentType)
+      },
+      
       //网络请求相关
       getHomeMultidata() {
         getHomeMultidata().then(res => {
@@ -98,16 +118,20 @@
         getHomeGoods(type, page).then(res => {
           // console.log(res);
           this.goods[type].list.push(...res.data.list);
-          this.goods[type].page += 1
+          this.goods[type].page += 1;
+
+          this.$refs.scroll.finishPullUp()
         })
-      }
+      },
+
     },
   }
 </script>
 
-<style>
+<style scoped>
   #home {
     padding-top: 44px;
+    height: 100vh;
   }
 
   .home-nav {
@@ -125,5 +149,9 @@
     position: sticky;
     top: 44px;
     z-index: 9;
+  }
+
+  .content {
+    height: calc(100% - 49px);
   }
 </style>
