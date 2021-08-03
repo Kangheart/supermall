@@ -40,9 +40,11 @@
         this.$emit('scroll', position)
       })
 
+      // console.log(this.scroll)
+
       //3.监听上拉事件
       this.scroll.on('pullingUp', () => {
-        // console.log("上拉加载")
+        // console.log("上拉到底部")
         this.$emit('pullingUp')
       })
     },
@@ -52,6 +54,12 @@
       },
       finishPullUp() {
         this.scroll.finishPullUp()
+      },
+      refresh() {
+        this.scroll.refresh()
+      },
+      getScrollY() {
+        return this.scroll ? this.scroll.y : 0
       }
     },
   }
