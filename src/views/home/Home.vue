@@ -164,7 +164,6 @@
           this.$refs.scroll.finishPullUp()
         })
       },
-
     },
   }
 </script>
