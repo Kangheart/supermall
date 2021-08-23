@@ -69,7 +69,7 @@
           'sell': {page: 0, list: []}
         },
         currentType: 'pop',
-        isShowBackTop: true,
+        isShowBackTop: false,
         tabOffsetTop: 0,
         isTabFixed: false,
         saveY: 0
@@ -86,7 +86,7 @@
     },
     mounted() {
       //1.监听item中图片加载完成
-      const refresh =debounce(this.$refs.scroll.refresh, 100)
+      const refresh = debounce(this.$refs.scroll.refresh, 100)
       this.$bus.$on('itemImageLoad', () => {
         refresh()
       })
